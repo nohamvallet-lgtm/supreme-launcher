@@ -1,0 +1,107 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#102017">
+<title>Suprême Launcher</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#101812;color:white;
+ font-family:Arial,sans-serif;
+}
+header{
+ padding:20px;display:flex;align-items:center;
+ justify-content:space-between;
+ background:#17251b;border-bottom:1px solid #294631;
+}
+.logo{font-size:20px;font-weight:bold;color:#65d879}
+.tag{background:#285c36;padding:7px 12px;border-radius:20px;font-size:12px}
+main{max-width:850px;margin:auto;padding:22px}
+.hero{
+ padding:35px 24px;border-radius:20px;
+ background:linear-gradient(140deg,#246c38,#102b1b);
+ margin-bottom:22px;
+}
+.hero h1{font-size:30px;margin:0 0 12px}
+.hero p{color:#d2e8d5;line-height:1.5}
+button{
+ border:0;border-radius:12px;padding:14px 18px;
+ background:#48b95f;color:white;font-weight:bold;
+ font-size:15px;cursor:pointer;
+}
+button:active{transform:scale(.98)}
+h2{font-size:19px;margin-top:28px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}
+.card{
+ background:#1c2a20;padding:19px;border-radius:15px;
+ border:1px solid #304b36;
+}
+.card .emoji{font-size:27px}
+.card h3{margin:10px 0 5px}
+.card p{font-size:13px;color:#b9cabb;line-height:1.5}
+footer{text-align:center;color:#819286;font-size:12px;padding:30px}
+.small{font-size:12px;color:#9db4a1}
+@media(max-width:420px){
+ .hero h1{font-size:25px}
+ main{padding:15px}
+}
+</style>
+</head>
+<body>
+<header>
+ <div class="logo">🟩 SUPRÊME</div>
+ <span class="tag">BEDROCK</span>
+</header>
+
+<main>
+ <section class="hero">
+  <div class="small">TON ESPACE MINECRAFT</div>
+  <h1>Bienvenue dans ton univers.</h1>
+  <p>Retrouve tes serveurs, tes actualités et tes informations Minecraft Bedrock au même endroit.</p>
+  <button onclick="openMinecraft()">▶ OUVRIR MINECRAFT</button>
+ </section>
+
+ <h2>Explorer</h2>
+ <section class="grid">
+  <div class="card">
+   <div class="emoji">🌍</div>
+   <h3>Serveurs</h3>
+   <p>Retrouve prochainement tes serveurs Bedrock favoris.</p>
+  </div>
+  <div class="card">
+   <div class="emoji">📰</div>
+   <h3>Actualités</h3>
+   <p>Les nouveautés de l'univers Minecraft.</p>
+  </div>
+  <div class="card">
+   <div class="emoji">👤</div>
+   <h3>Mon profil</h3>
+   <p>Ton espace joueur personnalisé.</p>
+  </div>
+  <div class="card">
+   <div class="emoji">⚙️</div>
+   <h3>Paramètres</h3>
+   <p>Les réglages de Suprême Launcher.</p>
+  </div>
+ </section>
+
+ <h2>À propos</h2>
+ <section class="card">
+  <h3>Suprême Launcher</h3>
+  <p>Version 1.0.0 — Première édition</p>
+  <p>Un projet indépendant pour les joueurs Minecraft Bedrock.</p>
+ </section>
+</main>
+
+<footer>SUPRÊME LAUNCHER · 2026</footer>
+
+<script>
+function openMinecraft(){
+ window.location.href = "minecraft://";
+}
+</script>
+</body>
+</html>
