@@ -1,0 +1,545 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Suprême World 0.4</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#87ceeb;font-family:Arial,sans-serif;touch-action:none}
+#game{position:fixed;inset:0}
+#top{position:fixed;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;z-index:4;pointer-events:none}
+.pill{background:#102b18e8;color:white;padding:8px 11px;border-radius:12px;font-size:13px;font-weight:bold}
+#topRight{display:flex;gap:6px;align-items:center;pointer-events:auto}
+#viewMode{min-height:36px;padding:6px 9px;font-size:11px;background:#245c36ed;pointer-events:auto}
+#hint{position:fixed;top:58px;left:50%;transform:translateX(-50%);z-index:3;background:#102b18d9;color:white;border-radius:9px;padding:6px 9px;font-size:11px;white-space:nowrap;pointer-events:none}
+#cross{position:fixed;left:50%;top:43%;transform:translate(-50%,-50%);color:white;font-size:22px;text-shadow:0 1px 4px #000;pointer-events:none;z-index:3}
+#bottom{position:fixed;bottom:10px;left:0;right:0;z-index:5;display:flex;justify-content:space-between;align-items:end;padding:0 10px;pointer-events:none}
+#pad,#actions{display:grid;gap:5px;pointer-events:auto}
+#pad{grid-template-columns:repeat(3,44px);grid-template-rows:repeat(2,44px)}
+#actions{grid-template-columns:repeat(2,58px)}
+button{border:1px solid #ffffff9c;background:#163d27e8;color:#fff;border-radius:11px;font-weight:bold;min-height:43px;font-size:13px;touch-action:none}
+button:active,.slot.active{background:#3d9b4c}
+.empty{visibility:hidden}
+#hotbar{position:fixed;left:50%;bottom:111px;transform:translateX(-50%);display:flex;gap:5px;z-index:5;max-width:96vw;overflow-x:auto;padding:4px}
+.slot{width:49px;height:49px;flex:0 0 49px;background:#17251eeb;border:2px solid #ffffff88;border-radius:8px;color:white;font-size:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.swatch{width:19px;height:19px;border:1px solid #ffffff99;border-radius:3px}
+#start{position:fixed;inset:0;z-index:10;background:#102b18e8;display:flex;align-items:center;justify-content:center;padding:20px}
+#panel{background:#f4fff5;color:#17351f;border-radius:20px;padding:22px;width:min(440px,100%);text-align:center}
+#panel h1{color:#267a38;margin:0 0 8px}
+#panel p{line-height:1.4;font-size:14px}
+#play{width:100%;background:#278b3c;min-height:48px;font-size:17px}
+@media(min-width:800px){
+#pad{grid-template-columns:repeat(3,54px);grid-template-rows:repeat(2,54px)}
+#actions{grid-template-columns:repeat(2,72px)}
+button{min-height:52px}
+#hotbar{bottom:18px}
+#bottom{bottom:18px}
+}
+</style>
+</head>
+<body>
+
+<div id="game"></div>
+
+<div id="top">
+ <div class="pill">⛏️ SUPRÊME WORLD 0.4</div>
+ <div id="topRight">
+  <button id="viewMode">VUE : DOS</button>
+  <div class="pill" id="status">Collisions activées</div>
+ </div>
+</div>
+
+<div id="hint">Glisse pour regarder • Les murs bloquent le personnage • Sélectionne un bloc en bas</div>
+<div id="cross">+</div>
+<div id="hotbar"></div>
+
+<div id="bottom">
+ <div id="pad">
+  <button class="empty"></button>
+  <button data-move="forward">▲</button>
+  <button class="empty"></button>
+  <button data-move="left">◀</button>
+  <button data-move="back">▼</button>
+  <button data-move="right">▶</button>
+ </div>
+ <div id="actions">
+  <button id="jump">SAUT</button>
+  <button id="break">CASSER</button>
+  <button id="place">POSER</button>
+  <button id="save">SAUVER</button>
+ </div>
+</div>
+
+<div id="start">
+ <div id="panel">
+  <h1>Suprême World 0.4</h1>
+  <p>Explore ton monde, construis avec 8 matériaux et découvre les trois modes de caméra.</p>
+  <p>Les blocs sont solides et ton monde peut être sauvegardé sur cet appareil.</p>
+  <button id="play">JOUER</button>
+ </div>
+</div>
+
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+const host=document.getElementById('game');
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x87ceeb);
+scene.fog=new THREE.Fog(0x87ceeb,22,65);
+
+const camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,.1,100);
+const renderer=new THREE.WebGLRenderer({antialias:false});
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;
+host.appendChild(renderer.domElement);
+
+scene.add(new THREE.HemisphereLight(0xffffff,0x61764a,2));
+const sun=new THREE.DirectionalLight(0xffffff,2);
+sun.position.set(-10,18,8);
+sun.castShadow=true;
+scene.add(sun);
+
+function texture(base,detail,kind='noise'){
+ const c=document.createElement('canvas');
+ c.width=c.height=64;
+ const ctx=c.getContext('2d');
+ ctx.fillStyle=base;
+ ctx.fillRect(0,0,64,64);
+
+ for(let i=0;i<210;i++){
+  const x=Math.random()*64,y=Math.random()*64,s=1+Math.random()*5;
+  ctx.globalAlpha=.13+Math.random()*.25;
+  ctx.fillStyle=detail;
+  ctx.fillRect(x,y,s,s);
+ }
+
+ if(kind==='wood'){
+  ctx.globalAlpha=.3;
+  ctx.strokeStyle=detail;
+  ctx.lineWidth=3;
+  for(let y=5;y<64;y+=12){
+   ctx.beginPath();
+   ctx.moveTo(0,y);
+   ctx.lineTo(64,y+2);
+   ctx.stroke();
+  }
+ }
+
+ if(kind==='brick'){
+  ctx.globalAlpha=.35;
+  ctx.strokeStyle='#402d22';
+  ctx.lineWidth=2;
+  for(let y=0;y<64;y+=16){
+   ctx.beginPath();
+   ctx.moveTo(0,y);
+   ctx.lineTo(64,y);
+   ctx.stroke();
+   for(let x=(y/16%2)*16;x<64;x+=32){
+    ctx.beginPath();
+    ctx.moveTo(x,y);
+    ctx.lineTo(x,y+16);
+    ctx.stroke();
+   }
+  }
+ }
+
+ const t=new THREE.CanvasTexture(c);
+ t.magFilter=THREE.NearestFilter;
+ t.minFilter=THREE.NearestFilter;
+ return t;
+}
+
+const defs=[
+ ['Herbe','#55a843','#a1d66c','noise'],
+ ['Terre','#8a5a35','#bd8b59','noise'],
+ ['Pierre','#858b91','#c2c7ca','noise'],
+ ['Sable','#d8bd78','#f0dfa7','noise'],
+ ['Bois','#95602f','#d49a54','wood'],
+ ['Briques','#a64f3c','#e18a69','brick'],
+ ['Feuilles','#347d36','#73ad49','noise'],
+ ['Planche','#b8874d','#e0bd7b','wood']
+];
+
+const materials=defs.map(d=>
+ new THREE.MeshLambertMaterial({map:texture(d[1],d[2],d[3])})
+);
+
+const cube=new THREE.BoxGeometry(1,1,1);
+const blocks=new Map();
+const key=(x,y,z)=>`${x},${y},${z}`;
+
+function addBlock(x,y,z,type=0){
+ const k=key(x,y,z);
+ if(blocks.has(k))return;
+
+ const m=new THREE.Mesh(cube,materials[type]);
+ m.position.set(x,y,z);
+ m.castShadow=true;
+ m.receiveShadow=true;
+ m.userData={x,y,z,type};
+ scene.add(m);
+ blocks.set(k,m);
+}
+
+function removeBlock(m){
+ if(!m?.userData)return;
+ const {x,y,z}=m.userData;
+ scene.remove(m);
+ blocks.delete(key(x,y,z));
+}
+
+// Terrain
+for(let x=-13;x<=13;x++){
+ for(let z=-13;z<=13;z++){
+  addBlock(x,-1,z,1);
+  addBlock(x,0,z,0);
+ }
+}
+
+// Maison
+for(let x=-3;x<=1;x++){
+ for(let z=-3;z<=1;z++){
+  if(x===-3||x===1||z===-3||z===1){
+   for(let y=1;y<=2;y++){
+    if((x===-3&&z===-1&&y===1)||(z===-3&&x===-1&&y===2))continue;
+    addBlock(x,y,z,4);
+   }
+  }
+ }
+}
+
+for(let x=-3;x<=1;x++){
+ for(let z=-3;z<=1;z++){
+  addBlock(x,3,z,7);
+ }
+}
+
+// Arbres
+for(const [tx,tz] of [[-7,-4],[7,-6],[6,7],[-9,6]]){
+ for(let y=1;y<=3;y++)addBlock(tx,y,tz,4);
+ for(let x=-1;x<=1;x++){
+  for(let z=-1;z<=1;z++)addBlock(tx+x,4,tz+z,6);
+ }
+ addBlock(tx,5,tz,6);
+}
+
+// Personnage
+const player=new THREE.Group();
+const skin=new THREE.MeshLambertMaterial({color:0xe0ad83});
+const shirt=new THREE.MeshLambertMaterial({color:0x2879c7});
+const pants=new THREE.MeshLambertMaterial({color:0x293b72});
+const hair=new THREE.MeshLambertMaterial({color:0x493326});
+
+function part(w,h,d,mat,x,y,z){
+ const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+ m.position.set(x,y-.4,z);
+ m.castShadow=true;
+ player.add(m);
+}
+
+part(.55,.65,.3,shirt,0,1.35,0);
+part(.48,.48,.42,skin,0,1.93,0);
+part(.5,.18,.44,hair,0,2.24,0);
+part(.19,.62,.22,pants,-.16,.72,0);
+part(.19,.62,.22,pants,.16,.72,0);
+part(.17,.58,.2,shirt,-.37,1.36,0);
+part(.17,.58,.2,shirt,.37,1.36,0);
+scene.add(player);
+
+const playerPos=new THREE.Vector3(0,.5,6);
+let yaw=0,pitch=-.1,selected=0,vy=0,grounded=true;
+
+// Modes de caméra
+let cameraMode=0;
+const cameraNames=['DOS','1ÈRE PERSONNE','FACE'];
+const viewButton=document.getElementById('viewMode');
+
+viewButton.addEventListener('click',()=>{
+ cameraMode=(cameraMode+1)%3;
+ viewButton.textContent='VUE : '+cameraNames[cameraMode];
+ player.visible=cameraMode!==1;
+});
+
+const BODY_W=.62;
+const BODY_H=1.8;
+const EPS=.001;
+
+function overlapsBlock(px,feet,pz,bx,by,bz){
+ return px+BODY_W/2>bx-.5+EPS&&
+ px-BODY_W/2<bx+.5-EPS&&
+ pz+BODY_W/2>bz-.5+EPS&&
+ pz-BODY_W/2<bz+.5-EPS&&
+ feet+BODY_H>by-.5+EPS&&
+ feet<by+.5-EPS;
+}
+
+function collides(px,feet,pz){
+ const minX=Math.floor(px-BODY_W/2-.5);
+ const maxX=Math.ceil(px+BODY_W/2+.5);
+ const minZ=Math.floor(pz-BODY_W/2-.5);
+ const maxZ=Math.ceil(pz+BODY_W/2+.5);
+ const minY=Math.floor(feet-.5);
+ const maxY=Math.ceil(feet+BODY_H+.5);
+
+ for(let x=minX;x<=maxX;x++){
+  for(let z=minZ;z<=maxZ;z++){
+   for(let y=minY;y<=maxY;y++){
+    if(blocks.has(key(x,y,z))&&overlapsBlock(px,feet,pz,x,y,z))return true;
+   }
+  }
+ }
+ return false;
+}
+
+function moveAxis(axis,amount){
+ if(!amount)return;
+ const steps=Math.max(1,Math.ceil(Math.abs(amount)/.12));
+ const step=amount/steps;
+
+ for(let i=0;i<steps;i++){
+  const nx=playerPos.x+(axis==='x'?step:0);
+  const nz=playerPos.z+(axis==='z'?step:0);
+
+  if(!collides(nx,playerPos.y,nz)){
+   playerPos.x=nx;
+   playerPos.z=nz;
+  }
+ }
+}
+
+function moveVertical(amount){
+ if(!amount)return;
+ const steps=Math.max(1,Math.ceil(Math.abs(amount)/.1));
+ const step=amount/steps;
+
+ for(let i=0;i<steps;i++){
+  const ny=playerPos.y+step;
+
+  if(!collides(playerPos.x,ny,playerPos.z)){
+   playerPos.y=ny;
+   grounded=false;
+  }else{
+   if(step<0)grounded=true;
+   vy=0;
+   break;
+  }
+ }
+}
+
+const held={forward:false,back:false,left:false,right:false};
+
+function updateHotbar(){
+ const bar=document.getElementById('hotbar');
+ bar.innerHTML='';
+
+ defs.forEach((d,i)=>{
+  const b=document.createElement('button');
+  b.className='slot'+(i===selected?' active':'');
+  b.innerHTML=`<span class="swatch" style="background:${d[1]}"></span><span>${d[0]}</span>`;
+  b.addEventListener('click',()=>{
+   selected=i;
+   updateHotbar();
+  });
+  bar.appendChild(b);
+ });
+}
+
+updateHotbar();
+
+const ray=new THREE.Raycaster();
+
+function aim(){
+ ray.setFromCamera(new THREE.Vector2(0,0),camera);
+ return ray.intersectObjects([...blocks.values()],false).find(h=>h.distance<7);
+}
+
+function look(dx,dy){
+ yaw-=dx*.004;
+ pitch=THREE.MathUtils.clamp(pitch-dy*.003,-.55,.55);
+}
+
+let dragging=false,lx=0,ly=0;
+
+renderer.domElement.addEventListener('pointerdown',e=>{
+ dragging=true;
+ lx=e.clientX;
+ ly=e.clientY;
+});
+
+addEventListener('pointerup',()=>dragging=false);
+
+addEventListener('pointermove',e=>{
+ if(!dragging)return;
+ look(e.clientX-lx,e.clientY-ly);
+ lx=e.clientX;
+ ly=e.clientY;
+});
+
+document.querySelectorAll('[data-move]').forEach(b=>{
+ const d=b.dataset.move;
+ b.addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  held[d]=true;
+ });
+ ['pointerup','pointercancel','pointerleave'].forEach(ev=>
+  b.addEventListener(ev,()=>held[d]=false)
+ );
+});
+
+document.getElementById('jump').addEventListener('pointerdown',()=>{
+ if(grounded){
+  vy=7;
+  grounded=false;
+ }
+});
+
+document.getElementById('break').addEventListener('click',()=>{
+ const h=aim();
+ if(h)removeBlock(h.object);
+});
+
+document.getElementById('place').addEventListener('click',()=>{
+ const h=aim();
+ if(!h)return;
+
+ const p=h.object.position.clone().add(h.face.normal);
+ const x=Math.round(p.x);
+ const y=Math.round(p.y);
+ const z=Math.round(p.z);
+
+ if(!overlapsBlock(playerPos.x,playerPos.y,playerPos.z,x,y,z)){
+  addBlock(x,y,z,selected);
+ }
+});
+
+function save(){
+ const data={
+  blocks:[...blocks.values()].map(m=>[
+   m.userData.x,m.userData.y,m.userData.z,m.userData.type
+  ]),
+  player:[playerPos.x,playerPos.y,playerPos.z],
+  yaw
+ };
+
+ try{
+  localStorage.setItem('supreme_world_03',JSON.stringify(data));
+  document.getElementById('status').textContent='Monde sauvegardé ✓';
+ }catch(e){
+  document.getElementById('status').textContent='Sauvegarde impossible';
+ }
+}
+
+function load(){
+ try{
+  const raw=localStorage.getItem('supreme_world_03');
+  if(!raw)return;
+
+  const d=JSON.parse(raw);
+
+  for(const m of [...blocks.values()])removeBlock(m);
+  for(const a of d.blocks)addBlock(...a);
+
+  if(d.player)playerPos.set(...d.player);
+  yaw=d.yaw||0;
+ }catch(e){}
+}
+
+load();
+
+document.getElementById('save').addEventListener('click',save);
+
+document.getElementById('play').addEventListener('click',()=>{
+ document.getElementById('start').style.display='none';
+});
+
+// Boucle du jeu
+const clock=new THREE.Clock();
+
+function animate(){
+ requestAnimationFrame(animate);
+
+ const dt=Math.min(clock.getDelta(),.04);
+ const f=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));
+ const r=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));
+ const mv=new THREE.Vector3();
+
+ if(held.forward)mv.add(f);
+ if(held.back)mv.sub(f);
+ if(held.right)mv.add(r);
+ if(held.left)mv.sub(r);
+
+ if(mv.lengthSq()){
+  mv.normalize().multiplyScalar(4.2*dt);
+  moveAxis('x',mv.x);
+  moveAxis('z',mv.z);
+ }
+
+ vy-=18*dt;
+ moveVertical(vy*dt);
+
+ if(playerPos.y<.5){
+  playerPos.y=.5;
+  vy=0;
+  grounded=true;
+ }
+
+ playerPos.x=THREE.MathUtils.clamp(playerPos.x,-12,12);
+ playerPos.z=THREE.MathUtils.clamp(playerPos.z,-12,12);
+
+ player.position.set(playerPos.x,playerPos.y,playerPos.z);
+ player.rotation.y=yaw;
+
+ const target=new THREE.Vector3(
+  playerPos.x,
+  playerPos.y+1.15,
+  playerPos.z
+ );
+
+ const offset=new THREE.Vector3(
+  Math.sin(yaw)*5,
+  2.3+pitch*2,
+  Math.cos(yaw)*5
+ );
+
+ if(cameraMode===1){
+  // Première personne
+  const eye=new THREE.Vector3(
+   playerPos.x,
+   playerPos.y+1.55,
+   playerPos.z
+  );
+
+  const direction=new THREE.Vector3(
+   -Math.sin(yaw)*Math.cos(pitch),
+   Math.sin(pitch),
+   -Math.cos(yaw)*Math.cos(pitch)
+  );
+
+  camera.position.copy(eye);
+  camera.lookAt(eye.clone().add(direction.multiplyScalar(10)));
+ }else{
+  // Vue arrière ou vue de face
+  const cameraTarget=cameraMode===0
+   ? target.clone().add(offset)
+   : target.clone().sub(offset);
+
+  camera.position.lerp(cameraTarget,.2);
+  camera.lookAt(target);
+ }
+
+ renderer.render(scene,camera);
+}
+
+animate();
+
+addEventListener('resize',()=>{
+ camera.aspect=innerWidth/innerHeight;
+ camera.updateProjectionMatrix();
+ renderer.setSize(innerWidth,innerHeight);
+});
+</script>
+</body>
+</html>
