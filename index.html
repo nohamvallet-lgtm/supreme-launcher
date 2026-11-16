@@ -3,115 +3,206 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#101812">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#102017">
 <title>Suprême Launcher</title>
 <style>
+:root{--bg:#101812;--panel:#1c2a20;--header:#17251b;--green:#48b95f;--text:#fff;--muted:#b9cabb}
 *{box-sizing:border-box}
-body{margin:0;background:#101812;color:white;font-family:Arial,sans-serif}
-header{padding:18px;background:#17251b;display:flex;justify-content:space-between;align-items:center}
-.logo{font-size:19px;font-weight:bold;color:#65d879}
-.tag{background:#285c36;padding:7px 12px;border-radius:20px;font-size:12px}
-nav{display:flex;gap:10px;padding:15px;max-width:850px;margin:auto}
-nav button{flex:1;background:#203328;color:#cce5d0}
-nav button.active{background:#32934b;color:white}
-main{max-width:850px;margin:auto;padding:15px}
-section.panel{display:none}
-section.panel.active{display:block}
-.hero,.card{padding:22px;border-radius:17px;background:#1c2a20;border:1px solid #304b36;margin-bottom:15px}
-.hero{background:linear-gradient(140deg,#246c38,#102b1b)}
-h1{font-size:27px}
-h2{font-size:20px}
-p{color:#b9cabb;line-height:1.5}
-button{border:0;border-radius:10px;padding:12px;background:#48b95f;color:white;font-weight:bold;cursor:pointer}
-input{width:100%;padding:13px;border:1px solid #45614a;border-radius:10px;background:#101812;color:white;margin:7px 0 14px}
-label{font-size:13px;color:#cce5d0}
-.server{padding:16px;background:#1c2a20;border:1px solid #304b36;border-radius:14px;margin:12px 0}
-.server strong{font-size:17px}
-.address{font-size:13px;overflow-wrap:anywhere;color:#a8c7ad}
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
+body.light{--bg:#edf5ee;--panel:#fff;--header:#dcecdf;--text:#17251b;--muted:#536b57}
+body.blue{--green:#3288d8;--header:#172338;--panel:#202e43}
+body.purple{--green:#9862d8;--header:#251a35;--panel:#30233e}
+header{background:var(--header);padding:17px;display:flex;justify-content:space-between;align-items:center}
+.logo{font-weight:bold;font-size:19px;color:var(--green)}
+.tag{background:var(--green);color:white;padding:7px 11px;border-radius:20px;font-size:11px}
+nav{display:flex;gap:7px;overflow-x:auto;padding:12px;max-width:950px;margin:auto}
+nav button{white-space:nowrap;background:var(--panel);color:var(--text);padding:11px 13px}
+nav button.active{background:var(--green);color:white}
+main{max-width:950px;margin:auto;padding:15px}
+.panel{display:none}.panel.active{display:block}
+.card,.hero{background:var(--panel);padding:19px;border-radius:16px;margin-bottom:14px;border:1px solid #55705a33}
+.hero{background:linear-gradient(135deg,#246c38,#102b1b);padding:27px}
+h1{font-size:26px;margin:8px 0}
+h2{font-size:19px;margin-top:8px}
+h3{font-size:16px}
+p{color:var(--muted);line-height:1.5}
+button{border:0;border-radius:10px;padding:12px;background:var(--green);color:white;font-weight:bold;cursor:pointer}
+input,textarea,select{width:100%;padding:12px;margin:7px 0 14px;border-radius:9px;border:1px solid #647d68;background:var(--bg);color:var(--text);font:inherit}
+textarea{min-height:75px}
+label{font-size:13px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.stat{font-size:24px;font-weight:bold;color:var(--green)}
+.small{font-size:12px;color:var(--muted)}
+.server{background:var(--panel);border:1px solid #55705a55;border-radius:13px;padding:15px;margin:12px 0}
+.server-address{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
 .actions button{font-size:12px}
-.delete{background:#963e3e}
-.favorite{background:#725c1c}
-.empty{text-align:center;padding:25px;color:#9db4a1}
-.small{font-size:12px;color:#9db4a1}
-footer{text-align:center;padding:25px;color:#819286;font-size:12px}
+.secondary{background:#526458}.danger{background:#a43d3d}.gold{background:#8b6b22}
+.link{display:block;color:var(--green);padding:10px 0;text-decoration:none;font-weight:bold}
+.avatar{width:85px;height:85px;border-radius:15px;object-fit:cover;background:#315b38}
+.news-item{padding:12px 0;border-bottom:1px solid #55705a55}
+footer{text-align:center;padding:25px;color:var(--muted);font-size:12px}
+@media(max-width:420px){.grid{grid-template-columns:1fr}main{padding:12px}}
 </style>
 </head>
 <body>
 <header>
- <div class="logo">🟩 SUPRÊME</div>
+ <div class="logo">🟩 SUPRÊME LAUNCHER</div>
  <span class="tag">BEDROCK</span>
 </header>
 
 <nav>
  <button class="active" data-tab="home">Accueil</button>
  <button data-tab="servers">Serveurs</button>
+ <button data-tab="profile">Profil</button>
+ <button data-tab="news">Actualités</button>
+ <button data-tab="versions">Versions</button>
+ <button data-tab="settings">Paramètres</button>
 </nav>
 
 <main>
 <section id="home" class="panel active">
  <div class="hero">
-  <div class="small">TON ESPACE MINECRAFT</div>
+  <div class="small">TON ESPACE MINECRAFT BEDROCK</div>
   <h1>Bienvenue dans ton univers.</h1>
-  <p>Retrouve tes serveurs Bedrock au même endroit.</p>
-  <button onclick="openMinecraft()">▶ OUVRIR MINECRAFT</button>
+  <p>Tout ton univers Minecraft au même endroit.</p>
+  <button onclick="showTab('servers')">🌍 Voir mes serveurs</button>
+ </div>
+ <div class="grid">
+  <div class="card"><div class="small">SERVEURS ENREGISTRÉS</div><div class="stat" id="statServers">0</div></div>
+  <div class="card"><div class="small">SERVEURS FAVORIS</div><div class="stat" id="statFavorites">0</div></div>
  </div>
  <div class="card">
-  <h2>🌍 Mes serveurs</h2>
-  <p id="homeCount">0 serveur enregistré</p>
-  <button onclick="showTab('servers')">Gérer mes serveurs</button>
+  <h2>👤 Mon profil</h2>
+  <p id="homePlayer">Joueur non renseigné</p>
+  <button onclick="showTab('profile')">Modifier mon profil</button>
  </div>
  <div class="card">
-  <h2>⭐ Favoris</h2>
-  <p>Retrouve ici tes serveurs préférés dans le menu Serveurs.</p>
+  <h2>📰 Actualités</h2>
+  <p>Consulte les annonces officielles de Minecraft.</p>
+  <button onclick="showTab('news')">Voir les actualités</button>
  </div>
 </section>
 
 <section id="servers" class="panel">
  <h1>🌍 Mes serveurs</h1>
- <p>Enregistre et organise tes serveurs Minecraft Bedrock.</p>
-
+ <p>Enregistre tes serveurs Minecraft Bedrock et retrouve tes favoris.</p>
  <div class="card">
   <h2>➕ Ajouter un serveur</h2>
-  <label for="serverName">Nom du serveur</label>
+  <label>Nom du serveur</label>
   <input id="serverName" placeholder="Ex : Mon serveur">
-
-  <label for="serverAddress">Adresse IP ou domaine</label>
+  <label>Adresse IP ou domaine</label>
   <input id="serverAddress" placeholder="Ex : play.exemple.fr">
-
-  <label for="serverPort">Port</label>
+  <label>Port Bedrock</label>
   <input id="serverPort" type="number" value="19132" min="1" max="65535">
-
   <button onclick="addServer()">Ajouter le serveur</button>
-  <p class="small">Les données sont enregistrées dans ce navigateur.</p>
  </div>
-
- <h2>📋 Liste des serveurs</h2>
+ <label>Filtrer les serveurs</label>
+ <select id="serverFilter" onchange="renderServers()">
+  <option value="all">Tous les serveurs</option>
+  <option value="favorites">Mes favoris</option>
+ </select>
  <div id="serverList"></div>
 </section>
-</main>
 
-<footer>SUPRÊME LAUNCHER · VERSION 1.1</footer>
+<section id="profile" class="panel">
+ <h1>👤 Mon profil joueur</h1>
+ <div class="card">
+  <div style="display:flex;align-items:center;gap:15px">
+   <div id="avatarFallback" class="avatar" style="display:grid;place-items:center;font-size:35px">⛏️</div>
+   <div><h2 id="profilePreview">Mon joueur</h2><p class="small">Profil local Suprême Launcher</p></div>
+  </div>
+  <label>Ton pseudo</label>
+  <input id="playerName" placeholder="Ton pseudo Minecraft">
+  <label>Description</label>
+  <textarea id="playerBio" placeholder="Présente-toi..."></textarea>
+  <label>Adresse d'une image de profil (facultatif)</label>
+  <input id="playerImage" placeholder="https://exemple.fr/image.png">
+  <button onclick="saveProfile()">Enregistrer mon profil</button>
+ </div>
+</section>
+
+<section id="news" class="panel">
+ <h1>📰 Actualités Minecraft</h1>
+ <div class="card">
+  <h2>Les nouvelles officielles</h2>
+  <p>Retrouve les annonces, nouveautés et informations publiées par Minecraft.</p>
+  <div class="news-item">
+   <strong>Actualités Minecraft</strong>
+   <a class="link" href="https://www.minecraft.net/fr-fr/articles" target="_blank" rel="noopener">Lire les articles officiels ↗</a>
+  </div>
+  <div class="news-item">
+   <strong>Mises à jour Bedrock</strong>
+   <a class="link" href="https://www.minecraft.net/fr-fr/updates" target="_blank" rel="noopener">Consulter les mises à jour ↗</a>
+  </div>
+  <div class="news-item">
+   <strong>Aide Minecraft</strong>
+   <a class="link" href="https://help.minecraft.net/" target="_blank" rel="noopener">Centre d'aide officiel ↗</a>
+  </div>
+  <p class="small">Ces liens ouvrent les pages officielles. Les actualités ne sont pas importées automatiquement dans le launcher.</p>
+ </div>
+</section>
+
+<section id="versions" class="panel">
+ <h1>🎮 Versions Minecraft</h1>
+ <div class="card">
+  <h2>Bedrock Edition</h2>
+  <p>Consulte les informations et notes de mise à jour sur le site officiel.</p>
+  <a class="link" href="https://www.minecraft.net/fr-fr/updates" target="_blank" rel="noopener">Voir les mises à jour ↗</a>
+  <label>Ma version installée (à renseigner)</label>
+  <input id="gameVersion" placeholder="Ex : 1.xx.xx">
+  <button onclick="saveVersion()">Enregistrer ma version</button>
+  <p id="versionSaved" class="small">Aucune version renseignée.</p>
+ </div>
+ <div class="card">
+  <h2>Version du launcher</h2>
+  <div class="stat">2.0.0</div>
+  <p>Suprême Launcher — édition compagnon Bedrock.</p>
+ </div>
+</section>
+
+<section id="settings" class="panel">
+ <h1>⚙️ Paramètres</h1>
+ <div class="card">
+  <h2>🎨 Apparence</h2>
+  <label>Thème du launcher</label>
+  <select id="themeSelect" onchange="changeTheme()">
+   <option value="green">Vert Minecraft</option>
+   <option value="blue">Bleu</option>
+   <option value="purple">Violet</option>
+   <option value="light">Clair</option>
+  </select>
+ </div>
+ <div class="card">
+  <h2>💾 Mes données</h2>
+  <p>Exporter une copie de tes serveurs et de ton profil.</p>
+  <button onclick="exportData()">Exporter mes données</button>
+  <p class="small">Garde ce fichier pour sauvegarder tes informations.</p>
+ </div>
+ <div class="card">
+  <h2>ℹ️ À propos</h2>
+  <p>Suprême Launcher 2.0.0</p>
+  <p>Application compagnon indépendante pour Minecraft Bedrock.</p>
+  <p class="small">Ce launcher ne remplace pas Minecraft et ne peut pas installer le jeu ni rejoindre directement un serveur.</p>
+ </div>
+</section>
+</main>
+<footer>SUPRÊME LAUNCHER · VERSION 2.0.0</footer>
 
 <script>
-const STORAGE_KEY = "supreme_bedrock_servers";
+const STORAGE_KEY="supreme_bedrock_servers";
+const PROFILE_KEY="supreme_player_profile";
+const THEME_KEY="supreme_theme";
+const VERSION_KEY="supreme_game_version";
 
-function loadServers(){
- try {
-  const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-  return Array.isArray(data) ? data : [];
- } catch {
-  return [];
- }
+function read(key,fallback){
+ try{return JSON.parse(localStorage.getItem(key)) ?? fallback}
+ catch{return fallback}
 }
-
-let servers = loadServers();
-
-function saveServers(){
- localStorage.setItem(STORAGE_KEY, JSON.stringify(servers));
- renderServers();
-}
+let servers=read(STORAGE_KEY,[]);
+let profile=read(PROFILE_KEY,{name:"",bio:"",image:""});
+let theme=localStorage.getItem(THEME_KEY)||"green";
 
 function showTab(id){
  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
@@ -119,105 +210,120 @@ function showTab(id){
  document.getElementById(id).classList.add("active");
  document.querySelector('[data-tab="'+id+'"]').classList.add("active");
 }
-
-document.querySelectorAll("nav button").forEach(button=>{
- button.addEventListener("click",()=>showTab(button.dataset.tab));
+document.querySelectorAll("nav button").forEach(b=>{
+ b.addEventListener("click",()=>showTab(b.dataset.tab));
 });
 
+function saveServers(){
+ localStorage.setItem(STORAGE_KEY,JSON.stringify(servers));
+ renderServers();
+}
 function addServer(){
  const name=document.getElementById("serverName").value.trim();
  const address=document.getElementById("serverAddress").value.trim();
  const port=Number(document.getElementById("serverPort").value);
-
- if(!name || !address || !Number.isInteger(port) || port<1 || port>65535){
+ if(!name||!address||!Number.isInteger(port)||port<1||port>65535){
   alert("Vérifie le nom, l'adresse et le port.");
   return;
  }
-
- servers.push({
-  id:Date.now().toString()+Math.random().toString(16).slice(2),
-  name,address,port,favorite:false
- });
-
+ servers.push({id:Date.now().toString()+Math.random(),name,address,port,favorite:false});
  saveServers();
  document.getElementById("serverName").value="";
  document.getElementById("serverAddress").value="";
  document.getElementById("serverPort").value="19132";
  alert("Serveur ajouté !");
 }
-
 function renderServers(){
  const list=document.getElementById("serverList");
- document.getElementById("homeCount").textContent=
-  servers.length+" serveur"+(servers.length>1?"s":"")+" enregistré"+(servers.length>1?"s":"");
-
  list.replaceChildren();
-
- if(servers.length===0){
-  const empty=document.createElement("div");
-  empty.className="empty";
-  empty.textContent="Aucun serveur pour le moment. Ajoute ton premier serveur !";
-  list.appendChild(empty);
-  return;
+ const filter=document.getElementById("serverFilter").value;
+ const shown=servers.filter(s=>filter==="all"||s.favorite);
+ if(!shown.length){
+  const p=document.createElement("p");
+  p.className="card";p.textContent=filter==="all"?"Aucun serveur enregistré.":"Aucun favori pour le moment.";
+  list.appendChild(p);
  }
-
- servers.forEach(server=>{
-  const card=document.createElement("div");
-  card.className="server";
-
+ shown.forEach(s=>{
+  const card=document.createElement("div");card.className="server";
   const title=document.createElement("strong");
-  title.textContent=(server.favorite?"⭐ ":"🌍 ")+server.name;
-
-  const address=document.createElement("div");
-  address.className="address";
-  address.textContent=server.address+":"+server.port;
-
-  const actions=document.createElement("div");
-  actions.className="actions";
-
-  const copy=document.createElement("button");
-  copy.textContent="📋 Copier l'adresse";
-  copy.onclick=()=>copyAddress(server);
-
-  const favorite=document.createElement("button");
-  favorite.className="favorite";
-  favorite.textContent=server.favorite?"Retirer des favoris":"⭐ Favoris";
-  favorite.onclick=()=>{
-   server.favorite=!server.favorite;
-   saveServers();
-  };
-
-  const remove=document.createElement("button");
-  remove.className="delete";
-  remove.textContent="Supprimer";
-  remove.onclick=()=>{
-   if(confirm("Supprimer ce serveur ?")){
-    servers=servers.filter(s=>s.id!==server.id);
-    saveServers();
-   }
-  };
-
-  actions.append(copy,favorite,remove);
-  card.append(title,address,actions);
-  list.appendChild(card);
+  title.textContent=(s.favorite?"⭐ ":"🌍 ")+s.name;
+  const addr=document.createElement("p");addr.className="server-address";
+  addr.textContent=s.address+":"+s.port;
+  const actions=document.createElement("div");actions.className="actions";
+  const copy=document.createElement("button");copy.textContent="📋 Copier";
+  copy.onclick=()=>copyAddress(s);
+  const fav=document.createElement("button");fav.className="gold";
+  fav.textContent=s.favorite?"Retirer des favoris":"⭐ Favori";
+  fav.onclick=()=>{s.favorite=!s.favorite;saveServers()};
+  const del=document.createElement("button");del.className="danger";del.textContent="Supprimer";
+  del.onclick=()=>{if(confirm("Supprimer ce serveur ?")){servers=servers.filter(x=>x.id!==s.id);saveServers()}};
+  actions.append(copy,fav,del);card.append(title,addr,actions);list.appendChild(card);
  });
+ document.getElementById("statServers").textContent=servers.length;
+ document.getElementById("statFavorites").textContent=servers.filter(s=>s.favorite).length;
+}
+async function copyAddress(s){
+ const value=s.address+":"+s.port;
+ try{await navigator.clipboard.writeText(value);alert("Adresse copiée !")}
+ catch{prompt("Copie cette adresse :",value)}
 }
 
-async function copyAddress(server){
- const value=server.address+":"+server.port;
- try{
-  await navigator.clipboard.writeText(value);
-  alert("Adresse copiée !");
- }catch{
-  prompt("Copie cette adresse :",value);
- }
+function saveProfile(){
+ profile={
+  name:document.getElementById("playerName").value.trim(),
+  bio:document.getElementById("playerBio").value.trim(),
+  image:document.getElementById("playerImage").value.trim()
+ };
+ localStorage.setItem(PROFILE_KEY,JSON.stringify(profile));
+ renderProfile();alert("Profil enregistré !");
+}
+function renderProfile(){
+ document.getElementById("playerName").value=profile.name||"";
+ document.getElementById("playerBio").value=profile.bio||"";
+ document.getElementById("playerImage").value=profile.image||"";
+ document.getElementById("profilePreview").textContent=profile.name||"Mon joueur";
+ document.getElementById("homePlayer").textContent=profile.name||"Joueur non renseigné";
+ const box=document.getElementById("avatarFallback");
+ box.replaceChildren();
+ if(profile.image){
+  const img=document.createElement("img");
+  img.src=profile.image;img.alt="Image de profil";img.className="avatar";
+  img.onerror=()=>{box.textContent="⛏️"};
+  box.appendChild(img);
+ }else{box.textContent="⛏️"}
 }
 
-function openMinecraft(){
- window.location.href="minecraft://";
+function saveVersion(){
+ const v=document.getElementById("gameVersion").value.trim();
+ localStorage.setItem(VERSION_KEY,JSON.stringify(v));
+ document.getElementById("versionSaved").textContent=v?"Version enregistrée : "+v:"Aucune version renseignée.";
 }
-
+function loadVersion(){
+ const v=read(VERSION_KEY,"");
+ document.getElementById("gameVersion").value=v;
+ document.getElementById("versionSaved").textContent=v?"Version enregistrée : "+v:"Aucune version renseignée.";
+}
+function changeTheme(){
+ theme=document.getElementById("themeSelect").value;
+ localStorage.setItem(THEME_KEY,theme);applyTheme();
+}
+function applyTheme(){
+ document.body.classList.remove("light","blue","purple");
+ if(theme!=="green")document.body.classList.add(theme);
+ document.getElementById("themeSelect").value=theme;
+}
+function exportData(){
+ const data={servers,profile,theme,version:read(VERSION_KEY,"")};
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement("a");
+ a.href=url;a.download="supreme-launcher-sauvegarde.json";a.click();
+ URL.revokeObjectURL(url);
+}
+applyTheme();
 renderServers();
+renderProfile();
+loadVersion();
 </script>
 </body>
 </html>
