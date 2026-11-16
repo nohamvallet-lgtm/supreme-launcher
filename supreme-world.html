@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Suprême World — Prototype</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin:0; width:100%; height:100%; overflow:hidden; background:#87ceeb; font-family:Arial,sans-serif; touch-action:none; }
+  #game { position:fixed; inset:0; }
+  #top { position:fixed; top:12px; left:12px; right:12px; display:flex; justify-content:space-between; align-items:center; z-index:5; pointer-events:none; }
+  .pill { background:#102b18d9; color:white; padding:9px 13px; border-radius:12px; font-weight:bold; font-size:14px; }
+  #crosshair { position:fixed; left:50%; top:50%; width:18px; height:18px; transform:translate(-50%,-50%); z-index:4; pointer-events:none; }
+  #crosshair:before, #crosshair:after { content:""; position:absolute; background:white; box-shadow:0 0 3px #000; }
+  #crosshair:before { width:2px; height:18px; left:8px; }
+  #crosshair:after { height:2px; width:18px; top:8px; }
+  #controls { position:fixed; inset:auto 0 18px 0; z-index:6; display:flex; justify-content:space-between; align-items:end; padding:0 18px; pointer-events:none; }
+  .pad, .actions { pointer-events:auto; display:grid; gap:7px; }
+  .pad { grid-template-columns:repeat(3,48px); grid-template-rows:repeat(2,48px); }
+  .actions { grid-template-columns:repeat(2,62px); }
+  button { border:1px solid #ffffff80; background:#153d24d9; color:white; border-radius:13px; font-weight:bold; font-size:16px; min-height:48px; touch-action:none; }
+  button:active { background:#2f8d48; }
+  .empty { visibility:hidden; }
+  #hint { position:fixed; left:50%; bottom:140px; transform:translateX(-50%); z-index:5; color:white; background:#102b18c9; padding:8px 12px; border-radius:10px; font-size:12px; white-space:nowrap; }
+  #start { position:fixed; inset:0; z-index:10; display:flex; align-items:center; justify-content:center; background:#102b18cc; padding:24px; }
+  #panel { width:min(420px,100%); background:#f4fff5; color:#17351f; border-radius:20px; padding:24px; text-align:center; }
+  #panel h1 { margin:0 0 8px; color:#267a38; }
+  #panel p { line-height:1.45; }
+  #play { background:#278b3c; width:100%; min-height:52px; font-size:18px; }
+  @media (min-width:900px) { #hint { bottom:24px; } }
+</style>
+</head>
+<body>
+<div id="game"></div>
+<div id="top"><div class="pill">⛏️ SUPRÊME WORLD</div><div class="pill" id="selected">Bloc : herbe</div></div>
+<div id="crosshair"></div>
+<div id="hint">Glisse sur l'écran pour regarder • Utilise les flèches pour bouger</div>
+<div id="controls">
+  <div class="pad">
+    <button class="empty"></button><button data-move="forward">▲</button><button class="empty"></button>
+    <button data-move="left">◀</button><button data-move="back">▼</button><button data-move="right">▶</button>
+  </div>
+  <div class="actions">
+    <button id="jump">SAUT</button><button id="break">CASSER</button>
+    <button id="place">POSER</button><button id="change">BLOC</button>
+  </div>
+</div>
+<div id="start">
+  <div id="panel">
+    <h1>Suprême World</h1>
+    <p>Bienvenue dans le premier prototype 3D ! Explore le terrain, regarde autour de toi et construis avec des blocs.</p>
+    <p><small>Prototype expérimental : les mondes ne sont pas encore sauvegardés.</small></p>
+    <button id="play">JOUER</button>
+  </div>
+</div>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+const host = document.getElementById('game');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87ceeb);
+scene.fog = new THREE.Fog(0x87ceeb, 18, 55);
+const camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.1, 100);
+camera.position.set(0, 2.2, 7);
+const renderer = new THREE.WebGLRenderer({antialias:false});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.6));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+host.appendChild(renderer.domElement);
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x647a48, 2));
+const sun = new THREE.DirectionalLight(0xffffff, 2);
+sun.position.set(-8, 15, 8); sun.castShadow = true; scene.add(sun);
+
+const materials = [
+  new THREE.MeshLambertMaterial({color:0x55a843}), // herbe
+  new THREE.MeshLambertMaterial({color:0x8a5a35}), // terre
+  new THREE.MeshLambertMaterial({color:0x858b91}), // pierre
+  new THREE.MeshLambertMaterial({color:0xd8bd78})  // sable
+];
+const names = ['herbe','terre','pierre','sable'];
+const cube = new THREE.BoxGeometry(1,1,1);
+const blocks = new Map();
+const key = (x,y,z)=>`${x},${y},${z}`;
+function addBlock(x,y,z,type=0) {
+  const k=key(x,y,z); if(blocks.has(k)) return;
+  const mesh=new THREE.Mesh(cube,materials[type]);
+  mesh.position.set(x,y,z); mesh.castShadow=true; mesh.receiveShadow=true;
+  mesh.userData={x,y,z,type}; scene.add(mesh); blocks.set(k,mesh);
+}
+function removeBlock(mesh) {
+  if(!mesh || !mesh.userData) return;
+  const {x,y,z}=mesh.userData; scene.remove(mesh); blocks.delete(key(x,y,z));
+}
+for(let x=-12;x<=12;x++) for(let z=-12;z<=12;z++) {
+  addBlock(x,-1,z,1);
+  addBlock(x,0,z,0);
+  if((x*x+z*z)%37===0 && Math.abs(x)+Math.abs(z)>5) {
+    addBlock(x,1,z,1); addBlock(x,2,z,2);
+  }
+}
+// petits arbres décoratifs
+for(const [tx,tz] of [[-5,-3],[6,-5],[4,7],[-8,5]]) {
+  for(let y=1;y<=3;y++) addBlock(tx,y,tz,1);
+  for(let x=-1;x<=1;x++) for(let z=-1;z<=1;z++) addBlock(tx+x,4,tz+z,0);
+  addBlock(tx,5,tz,0);
+}
+
+const raycaster=new THREE.Raycaster();
+let yaw=0, pitch=0, selected=0, verticalVelocity=0, grounded=false;
+const held={forward:false,back:false,left:false,right:false};
+function look(dx,dy) {
+  yaw -= dx*0.004;
+  pitch -= dy*0.004;
+  pitch=Math.max(-1.25,Math.min(1.25,pitch));
+  camera.rotation.order='YXZ'; camera.rotation.set(pitch,yaw,0);
+}
+let dragging=false,lastX=0,lastY=0;
+renderer.domElement.addEventListener('pointerdown',e=>{
+  if(e.target.closest('button')) return;
+  dragging=true; lastX=e.clientX; lastY=e.clientY;
+});
+addEventListener('pointerup',()=>dragging=false);
+addEventListener('pointermove',e=>{
+  if(!dragging) return;
+  look(e.clientX-lastX,e.clientY-lastY); lastX=e.clientX; lastY=e.clientY;
+});
+document.querySelectorAll('[data-move]').forEach(btn=>{
+  const dir=btn.dataset.move;
+  btn.addEventListener('pointerdown',e=>{e.preventDefault();held[dir]=true;});
+  ['pointerup','pointercancel','pointerleave'].forEach(ev=>btn.addEventListener(ev,()=>held[dir]=false));
+});
+document.getElementById('jump').addEventListener('pointerdown',()=>{if(grounded){verticalVelocity=7;grounded=false;}});
+function targetBlock() {
+  raycaster.setFromCamera(new THREE.Vector2(0,0),camera);
+  return raycaster.intersectObjects([...blocks.values()],false).find(h=>h.distance<6);
+}
+document.getElementById('break').addEventListener('click',()=>{
+  const hit=targetBlock(); if(hit) removeBlock(hit.object);
+});
+document.getElementById('place').addEventListener('click',()=>{
+  const hit=targetBlock(); if(!hit) return;
+  const p=hit.object.position.clone().add(hit.face.normal);
+  addBlock(Math.round(p.x),Math.round(p.y),Math.round(p.z),selected);
+});
+document.getElementById('change').addEventListener('click',()=>{
+  selected=(selected+1)%materials.length;
+  document.getElementById('selected').textContent='Bloc : '+names[selected];
+});
+document.getElementById('play').addEventListener('click',()=>document.getElementById('start').style.display='none');
+
+const clock=new THREE.Clock();
+function animate(){
+  requestAnimationFrame(animate);
+  const dt=Math.min(clock.getDelta(),0.04);
+  const speed=5*dt;
+  const forward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));
+  const right=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));
+  const move=new THREE.Vector3();
+  if(held.forward) move.add(forward);
+  if(held.back) move.sub(forward);
+  if(held.right) move.add(right);
+  if(held.left) move.sub(right);
+  if(move.lengthSq()) {move.normalize().multiplyScalar(speed); camera.position.add(move);}
+  verticalVelocity-=18*dt;
+  camera.position.y+=verticalVelocity*dt;
+  const floor=1.65;
+  if(camera.position.y<floor){camera.position.y=floor;verticalVelocity=0;grounded=true;}
+  camera.position.x=Math.max(-11.5,Math.min(11.5,camera.position.x));
+  camera.position.z=Math.max(-11.5,Math.min(11.5,camera.position.z));
+  renderer.render(scene,camera);
+}
+animate();
+addEventListener('resize',()=>{
+  camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+});
+</script>
+</body>
+</html>
