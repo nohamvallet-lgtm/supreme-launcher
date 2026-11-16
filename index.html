@@ -4,50 +4,38 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#102017">
+<meta name="theme-color" content="#101812">
 <title>Suprême Launcher</title>
 <style>
 *{box-sizing:border-box}
-body{
- margin:0;background:#101812;color:white;
- font-family:Arial,sans-serif;
-}
-header{
- padding:20px;display:flex;align-items:center;
- justify-content:space-between;
- background:#17251b;border-bottom:1px solid #294631;
-}
-.logo{font-size:20px;font-weight:bold;color:#65d879}
+body{margin:0;background:#101812;color:white;font-family:Arial,sans-serif}
+header{padding:18px;background:#17251b;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:19px;font-weight:bold;color:#65d879}
 .tag{background:#285c36;padding:7px 12px;border-radius:20px;font-size:12px}
-main{max-width:850px;margin:auto;padding:22px}
-.hero{
- padding:35px 24px;border-radius:20px;
- background:linear-gradient(140deg,#246c38,#102b1b);
- margin-bottom:22px;
-}
-.hero h1{font-size:30px;margin:0 0 12px}
-.hero p{color:#d2e8d5;line-height:1.5}
-button{
- border:0;border-radius:12px;padding:14px 18px;
- background:#48b95f;color:white;font-weight:bold;
- font-size:15px;cursor:pointer;
-}
-button:active{transform:scale(.98)}
-h2{font-size:19px;margin-top:28px}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}
-.card{
- background:#1c2a20;padding:19px;border-radius:15px;
- border:1px solid #304b36;
-}
-.card .emoji{font-size:27px}
-.card h3{margin:10px 0 5px}
-.card p{font-size:13px;color:#b9cabb;line-height:1.5}
-footer{text-align:center;color:#819286;font-size:12px;padding:30px}
+nav{display:flex;gap:10px;padding:15px;max-width:850px;margin:auto}
+nav button{flex:1;background:#203328;color:#cce5d0}
+nav button.active{background:#32934b;color:white}
+main{max-width:850px;margin:auto;padding:15px}
+section.panel{display:none}
+section.panel.active{display:block}
+.hero,.card{padding:22px;border-radius:17px;background:#1c2a20;border:1px solid #304b36;margin-bottom:15px}
+.hero{background:linear-gradient(140deg,#246c38,#102b1b)}
+h1{font-size:27px}
+h2{font-size:20px}
+p{color:#b9cabb;line-height:1.5}
+button{border:0;border-radius:10px;padding:12px;background:#48b95f;color:white;font-weight:bold;cursor:pointer}
+input{width:100%;padding:13px;border:1px solid #45614a;border-radius:10px;background:#101812;color:white;margin:7px 0 14px}
+label{font-size:13px;color:#cce5d0}
+.server{padding:16px;background:#1c2a20;border:1px solid #304b36;border-radius:14px;margin:12px 0}
+.server strong{font-size:17px}
+.address{font-size:13px;overflow-wrap:anywhere;color:#a8c7ad}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.actions button{font-size:12px}
+.delete{background:#963e3e}
+.favorite{background:#725c1c}
+.empty{text-align:center;padding:25px;color:#9db4a1}
 .small{font-size:12px;color:#9db4a1}
-@media(max-width:420px){
- .hero h1{font-size:25px}
- main{padding:15px}
-}
+footer{text-align:center;padding:25px;color:#819286;font-size:12px}
 </style>
 </head>
 <body>
@@ -56,52 +44,180 @@ footer{text-align:center;color:#819286;font-size:12px;padding:30px}
  <span class="tag">BEDROCK</span>
 </header>
 
+<nav>
+ <button class="active" data-tab="home">Accueil</button>
+ <button data-tab="servers">Serveurs</button>
+</nav>
+
 <main>
- <section class="hero">
+<section id="home" class="panel active">
+ <div class="hero">
   <div class="small">TON ESPACE MINECRAFT</div>
   <h1>Bienvenue dans ton univers.</h1>
-  <p>Retrouve tes serveurs, tes actualités et tes informations Minecraft Bedrock au même endroit.</p>
+  <p>Retrouve tes serveurs Bedrock au même endroit.</p>
   <button onclick="openMinecraft()">▶ OUVRIR MINECRAFT</button>
- </section>
+ </div>
+ <div class="card">
+  <h2>🌍 Mes serveurs</h2>
+  <p id="homeCount">0 serveur enregistré</p>
+  <button onclick="showTab('servers')">Gérer mes serveurs</button>
+ </div>
+ <div class="card">
+  <h2>⭐ Favoris</h2>
+  <p>Retrouve ici tes serveurs préférés dans le menu Serveurs.</p>
+ </div>
+</section>
 
- <h2>Explorer</h2>
- <section class="grid">
-  <div class="card">
-   <div class="emoji">🌍</div>
-   <h3>Serveurs</h3>
-   <p>Retrouve prochainement tes serveurs Bedrock favoris.</p>
-  </div>
-  <div class="card">
-   <div class="emoji">📰</div>
-   <h3>Actualités</h3>
-   <p>Les nouveautés de l'univers Minecraft.</p>
-  </div>
-  <div class="card">
-   <div class="emoji">👤</div>
-   <h3>Mon profil</h3>
-   <p>Ton espace joueur personnalisé.</p>
-  </div>
-  <div class="card">
-   <div class="emoji">⚙️</div>
-   <h3>Paramètres</h3>
-   <p>Les réglages de Suprême Launcher.</p>
-  </div>
- </section>
+<section id="servers" class="panel">
+ <h1>🌍 Mes serveurs</h1>
+ <p>Enregistre et organise tes serveurs Minecraft Bedrock.</p>
 
- <h2>À propos</h2>
- <section class="card">
-  <h3>Suprême Launcher</h3>
-  <p>Version 1.0.0 — Première édition</p>
-  <p>Un projet indépendant pour les joueurs Minecraft Bedrock.</p>
- </section>
+ <div class="card">
+  <h2>➕ Ajouter un serveur</h2>
+  <label for="serverName">Nom du serveur</label>
+  <input id="serverName" placeholder="Ex : Mon serveur">
+
+  <label for="serverAddress">Adresse IP ou domaine</label>
+  <input id="serverAddress" placeholder="Ex : play.exemple.fr">
+
+  <label for="serverPort">Port</label>
+  <input id="serverPort" type="number" value="19132" min="1" max="65535">
+
+  <button onclick="addServer()">Ajouter le serveur</button>
+  <p class="small">Les données sont enregistrées dans ce navigateur.</p>
+ </div>
+
+ <h2>📋 Liste des serveurs</h2>
+ <div id="serverList"></div>
+</section>
 </main>
 
-<footer>SUPRÊME LAUNCHER · 2026</footer>
+<footer>SUPRÊME LAUNCHER · VERSION 1.1</footer>
 
 <script>
-function openMinecraft(){
- window.location.href = "minecraft://";
+const STORAGE_KEY = "supreme_bedrock_servers";
+
+function loadServers(){
+ try {
+  const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  return Array.isArray(data) ? data : [];
+ } catch {
+  return [];
+ }
 }
+
+let servers = loadServers();
+
+function saveServers(){
+ localStorage.setItem(STORAGE_KEY, JSON.stringify(servers));
+ renderServers();
+}
+
+function showTab(id){
+ document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+ document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+ document.querySelector('[data-tab="'+id+'"]').classList.add("active");
+}
+
+document.querySelectorAll("nav button").forEach(button=>{
+ button.addEventListener("click",()=>showTab(button.dataset.tab));
+});
+
+function addServer(){
+ const name=document.getElementById("serverName").value.trim();
+ const address=document.getElementById("serverAddress").value.trim();
+ const port=Number(document.getElementById("serverPort").value);
+
+ if(!name || !address || !Number.isInteger(port) || port<1 || port>65535){
+  alert("Vérifie le nom, l'adresse et le port.");
+  return;
+ }
+
+ servers.push({
+  id:Date.now().toString()+Math.random().toString(16).slice(2),
+  name,address,port,favorite:false
+ });
+
+ saveServers();
+ document.getElementById("serverName").value="";
+ document.getElementById("serverAddress").value="";
+ document.getElementById("serverPort").value="19132";
+ alert("Serveur ajouté !");
+}
+
+function renderServers(){
+ const list=document.getElementById("serverList");
+ document.getElementById("homeCount").textContent=
+  servers.length+" serveur"+(servers.length>1?"s":"")+" enregistré"+(servers.length>1?"s":"");
+
+ list.replaceChildren();
+
+ if(servers.length===0){
+  const empty=document.createElement("div");
+  empty.className="empty";
+  empty.textContent="Aucun serveur pour le moment. Ajoute ton premier serveur !";
+  list.appendChild(empty);
+  return;
+ }
+
+ servers.forEach(server=>{
+  const card=document.createElement("div");
+  card.className="server";
+
+  const title=document.createElement("strong");
+  title.textContent=(server.favorite?"⭐ ":"🌍 ")+server.name;
+
+  const address=document.createElement("div");
+  address.className="address";
+  address.textContent=server.address+":"+server.port;
+
+  const actions=document.createElement("div");
+  actions.className="actions";
+
+  const copy=document.createElement("button");
+  copy.textContent="📋 Copier l'adresse";
+  copy.onclick=()=>copyAddress(server);
+
+  const favorite=document.createElement("button");
+  favorite.className="favorite";
+  favorite.textContent=server.favorite?"Retirer des favoris":"⭐ Favoris";
+  favorite.onclick=()=>{
+   server.favorite=!server.favorite;
+   saveServers();
+  };
+
+  const remove=document.createElement("button");
+  remove.className="delete";
+  remove.textContent="Supprimer";
+  remove.onclick=()=>{
+   if(confirm("Supprimer ce serveur ?")){
+    servers=servers.filter(s=>s.id!==server.id);
+    saveServers();
+   }
+  };
+
+  actions.append(copy,favorite,remove);
+  card.append(title,address,actions);
+  list.appendChild(card);
+ });
+}
+
+async function copyAddress(server){
+ const value=server.address+":"+server.port;
+ try{
+  await navigator.clipboard.writeText(value);
+  alert("Adresse copiée !");
+ }catch{
+  prompt("Copie cette adresse :",value);
+ }
+}
+
+function openMinecraft(){
+ window.location.href="minecraft://";
+}
+
+renderServers();
 </script>
 </body>
 </html>
